@@ -4,67 +4,55 @@
 #http://christopherreevesofficial.com
 #http://twitter.com/cjreeves2011
 
-import urllib
-import mechanize
+import urllib 
+import mechanize 
 from bs4 import BeautifulSoup
 from urlparse import urlparse
 import hashlib
 
 def searchPic(term):
-    rettext = ""
-    ur = getPic(term)
-    if ur != "error":
-        rettext = savePic(ur)
-    print "searched pic"        
-    return rettext        
+    img_list = getPic(term)
+    if len(img_list)>0:
+        for img in img_list:
+            savePic(img)
+    print "done..."     
 
-
-
-
-def getPic(search):
+def getPic (search):
+    search = search.replace(" ","%20")
     try:
         browser = mechanize.Browser()
         browser.set_handle_robots(False)
-        browser.addheaders = [('User-agent', 'Firefox')]
+        browser.addheaders = [('User-agent','Mozilla')]
 
-        htmltext = browser.open("https://www.google.com/search?safe=off&hl=en&biw=1366&bih=178&site=imghp&tbm=isch&sa=1&q="+search.replace(" ","+")).read()
-       
+        htmltext = browser.open("https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&q="+search+"&oq="+search)
         img_urls = []
+        formatted_images = []
         soup = BeautifulSoup(htmltext)
         results = soup.findAll("a")
         for r in results:
             try:
                 if "imgres?imgurl" in r['href']:
-                    img_urls.append( r['href'])
+                    img_urls.append(r['href'])
             except:
-                a =0
-        #print img_urls[0]
-        textd = urlparse(str(img_urls[0]))
-        return textd.query.split("&")[0].replace("imgurl=","")
-        print "got image url"
-    except:
-        return "error"
-        print "error getting pic"
+                a=0
+        for im in img_urls:
+            refer_url = urlparse(str(im))
+            image_f = refer_url.query.split("&")[0].replace("imgurl=","")
+            formatted_images.append(image_f)
+        
+        return  formatted_images
 
+    except:
+        return []
 
 def savePic(url):
-    uri = ""
     hs = hashlib.sha224(url).hexdigest()
-    if ".jpg" in url.lower():
-        uri = hs+".jpg"
-    if ".png" in url.lower():
-        uri = hs+".png"
-    if ".gif" in url.lower():
-        uri = hs+".gif"
-    if ".jpeg" in url.lower():
-        uri = hs+".jpeg"        
-    print uri
-    if uri != "":
-        urllib.urlretrieve(url,uri)
-        return uri
-        print "saved pic"
-    else:
-        print "error saving pic"
-        return "err"
-
-searchPic("citi bank")
+    file_extension = url.split(".")[-1]
+    uri = ""
+    dest = uri+hs+"."+file_extension
+    print dest
+    try:
+        urllib.urlretrieve(url,dest)
+    except:
+        print "save failed" 
+searchPic("tesla motors")   
