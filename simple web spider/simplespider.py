@@ -9,12 +9,20 @@ from bs4 import BeautifulSoup
 import urlparse
 import mechanize
 
+
+# Set the startingpoint for the spider and initialize 
+# the a mechanize browser object
 url = "http://sparkbrowser.com"
 br = mechanize.Browser()
 
-
+# create lists for the urls in que and visited urls
 urls = [url]
 visited = [url]
+
+
+# Since the amount of urls in the list is dynamic
+#   we just let the spider go until some last url didn't
+#   have new ones on the webpage
 while len(urls)>0:
     try:
         br.open(urls[0])
